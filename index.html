@@ -1,19 +1,27 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Survei Supplier Andesit — IMIP</title>
+  <title>Andesite Supplier Survey — IMIP</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .foto-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     .foto-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #d1d5db; }
-    .remove-btn { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .remove-btn { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; }
     .foto-thumb { position: relative; display: inline-block; }
     .foto-counter { font-size: 12px; margin-top: 6px; }
-    .foto-counter.ok { color: #16a34a; }
+    .foto-counter.ok   { color: #16a34a; }
     .foto-counter.warn { color: #d97706; }
-    .foto-counter.err { color: #dc2626; }
+    .foto-counter.err  { color: #dc2626; }
+    .checklist-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 8px; }
+    .checklist-label { font-size: 13px; font-weight: 500; color: #1e293b; font-family: monospace; }
+    .checklist-label .sub { font-family: sans-serif; font-size: 11px; font-weight: 400; color: #64748b; margin-left: 6px; }
+    .radio-group { display: flex; gap: 8px; }
+    .radio-group label { display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; transition: all 0.15s; }
+    .radio-group input[type="radio"] { display: none; }
+    .radio-group input[type="radio"]:checked + span { font-weight: 600; }
+    .radio-group label:has(input[type="radio"]:checked) { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen py-8 px-4 font-sans text-gray-800">
@@ -23,186 +31,270 @@
     <!-- Header -->
     <div class="bg-blue-700 text-white rounded-t-xl px-8 py-6">
       <div class="text-xs font-semibold uppercase tracking-widest text-blue-200 mb-1">IMIP Procurement</div>
-      <h1 class="text-2xl font-bold">Form Survei Supplier</h1>
-      <p class="text-blue-200 text-sm mt-1">Data akan tersimpan otomatis ke Google Sheets & Drive</p>
+      <h1 class="text-2xl font-bold">Andesite Supplier Survey</h1>
+      <p class="text-blue-200 text-sm mt-1">Data saves automatically to Google Sheets & Drive</p>
     </div>
 
-    <!-- Status bar koneksi -->
+    <!-- Connection status -->
     <div id="connectionStatus" class="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-6 py-3 flex items-center gap-2">
       <span class="inline-block w-2 h-2 rounded-full bg-yellow-400"></span>
-      <span id="connectionText">Mengecek koneksi ke server...</span>
+      <span id="connectionText">Checking server connection...</span>
     </div>
 
     <form id="surveyForm" class="bg-white shadow-lg rounded-b-xl px-8 py-8 space-y-8" novalidate>
 
-      <!-- SEKSI 1: Info Dasar -->
+      <!-- SECTION 1: Basic Info -->
       <div>
-        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-4 pb-2 border-b border-gray-100">Info Dasar</h2>
+        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-4 pb-2 border-b border-gray-100">Basic Information</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
           <div>
-            <label class="block text-sm font-medium mb-1">Tanggal Survei <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium mb-1">Survey Date <span class="text-red-500">*</span></label>
             <input type="date" name="tanggalSurvei" required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Nama Supplier <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium mb-1">Supplier Name <span class="text-red-500">*</span></label>
             <input type="text" name="namaSupplier" required placeholder="PT / CV ..." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Lokasi Supplier <span class="text-red-500">*</span></label>
-            <input type="text" name="lokasiSupplier" required placeholder="Kota / Kabupaten, Provinsi" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-sm font-medium mb-1">Supplier Location <span class="text-red-500">*</span></label>
+            <input type="text" name="lokasiSupplier" required placeholder="City / Regency, Province" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Jarak ke Gudang IMIP (km) <span class="text-red-500">*</span></label>
-            <input type="number" name="jarak" required min="0" step="any" placeholder="cth. 1250" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-sm font-medium mb-1">Distance to IMIP Warehouse (km) <span class="text-red-500">*</span></label>
+            <input type="number" name="jarak" required min="0" step="any" placeholder="e.g. 1250" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
-          <!-- GPS -->
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium mb-1">Koordinat GPS</label>
+            <label class="block text-sm font-medium mb-1">GPS Coordinates</label>
             <div class="flex gap-2">
-              <input type="text" name="koordinatGPS" id="koordinatGPS" readonly placeholder="Klik tombol untuk ambil lokasi otomatis" class="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50">
-              <button type="button" id="btnGPS" onclick="ambilGPS()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg flex items-center gap-1 transition">
+              <input type="text" name="koordinatGPS" id="koordinatGPS" readonly placeholder="Click button to auto-detect location" class="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50">
+              <button type="button" id="btnGPS" onclick="getGPS()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg flex items-center gap-1 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Ambil GPS
+                Get GPS
               </button>
             </div>
-            <p class="text-xs text-gray-400 mt-1" id="gpsStatus">Aktifkan izin lokasi di browser/HP untuk fitur ini.</p>
+            <p class="text-xs text-gray-400 mt-1" id="gpsStatus">Enable location permission in your browser / phone.</p>
           </div>
 
         </div>
       </div>
 
-      <!-- SEKSI 2: Kemampuan Supplier -->
+      <!-- SECTION 2: Supplier Capability -->
       <div>
-        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-4 pb-2 border-b border-gray-100">Kemampuan Supplier</h2>
+        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-4 pb-2 border-b border-gray-100">Supplier Capability</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
           <div>
-            <label class="block text-sm font-medium mb-1">Punya Tambang Sendiri <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium mb-1">Owns Quarry <span class="text-red-500">*</span></label>
             <select name="punyaTambang" required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-              <option value="">-- Pilih --</option>
-              <option value="Ya">Ya</option>
-              <option value="Tidak">Tidak</option>
+              <option value="">-- Select --</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Setuju TOP <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium mb-1">Agrees to TOP <span class="text-red-500">*</span></label>
             <select name="setujuTop" required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-              <option value="">-- Pilih --</option>
-              <option value="Ya">Ya</option>
-              <option value="Tidak">Tidak</option>
-              <option value="Nego">Nego</option>
+              <option value="">-- Select --</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+              <option value="Negotiable">Negotiable</option>
             </select>
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium mb-1">Produk yang Ditawarkan <span class="text-red-500">*</span></label>
-            <input type="text" name="produk" required placeholder="cth. Andesit 20x20, 30x30, Batu Pecah" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-sm font-medium mb-1">Products Offered <span class="text-red-500">*</span></label>
+            <input type="text" name="produk" required placeholder="e.g. Andesite 20×20, 30×30, Crushed Stone" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium mb-1">Biasanya Supply Kemana Saja <span class="text-red-500">*</span></label>
-            <textarea name="supplykemana" rows="2" required placeholder="cth. Proyek jalan tol Jawa, developer perumahan Jabodetabek, BUMN konstruksi..." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+            <label class="block text-sm font-medium mb-1">Usual Supply Destinations <span class="text-red-500">*</span></label>
+            <textarea name="supplykemana" rows="2" required placeholder="e.g. Toll road projects in Java, housing developers in Jabodetabek, state-owned construction firms..." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Kustomisasi Ukuran <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium mb-1">Size Customization <span class="text-red-500">*</span></label>
             <select name="kustomisasi" required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-              <option value="">-- Pilih --</option>
-              <option value="Bisa">Bisa</option>
-              <option value="Terbatas">Terbatas</option>
-              <option value="Tidak">Tidak</option>
+              <option value="">-- Select --</option>
+              <option value="Yes">Yes</option>
+              <option value="Limited">Limited</option>
+              <option value="No">No</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Kualitas Produk <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium mb-1">Product Quality <span class="text-red-500">*</span></label>
             <select name="kualitas" required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-              <option value="">-- Pilih --</option>
-              <option value="Baik">Baik</option>
-              <option value="Cukup">Cukup</option>
-              <option value="Kurang">Kurang</option>
+              <option value="">-- Select --</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+              <option value="Poor">Poor</option>
             </select>
           </div>
 
           <div>
             <label class="block text-sm font-medium mb-1">Lead Time <span class="text-red-500">*</span></label>
-            <input type="text" name="leadTime" required placeholder="cth. 7-14 hari kerja" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <input type="text" name="leadTime" required placeholder="e.g. 7–14 working days" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Kapasitas Produksi <span class="text-red-500">*</span></label>
-            <input type="text" name="kapasitas" required placeholder="cth. 500 m²/bulan" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-sm font-medium mb-1">Production Capacity <span class="text-red-500">*</span></label>
+            <input type="text" name="kapasitas" required placeholder="e.g. 500 m²/month" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Jumlah Karyawan <span class="text-red-500">*</span></label>
-            <input type="text" name="jumlahKaryawan" required placeholder="cth. 50 orang" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-sm font-medium mb-1">Number of Employees <span class="text-red-500">*</span></label>
+            <input type="text" name="jumlahKaryawan" required placeholder="e.g. 50 people" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Luas Pabrik / Tambang <span class="text-red-500">*</span></label>
-            <input type="text" name="luasPabrik" required placeholder="cth. 2 Ha / 5.000 m²" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-          </div>
-
-          <div class="sm:col-span-2">
-            <label class="block text-sm font-medium mb-1">Kemampuan Pengiriman <span class="text-red-500">*</span></label>
-            <textarea name="pengiriman" rows="2" required placeholder="Armada sendiri / ekspedisi, jangkauan area, dll." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- SEKSI 3: Komersial (tidak wajib) -->
-      <div>
-        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-1 pb-2 border-b border-gray-100">Info Komersial</h2>
-        <p class="text-xs text-gray-400 mb-4">Semua field di seksi ini opsional — isi jika sudah ada info.</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-          <div>
-            <label class="block text-sm font-medium mb-1">Kontak (PIC + No. WA)</label>
-            <input type="text" name="kontak" placeholder="cth. Pak Budi — 08123456789" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-sm font-medium mb-1">Factory / Quarry Area <span class="text-red-500">*</span></label>
+            <input type="text" name="luasPabrik" required placeholder="e.g. 2 Ha / 5,000 m²" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Harga (sampai JKT)</label>
-            <input type="text" name="harga" placeholder="cth. Rp 250.000/m²" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-1">Rekomendasi</label>
-            <select name="rekomendasi" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-              <option value="">-- Pilih --</option>
-              <option value="Shortlist">⭐ Shortlist</option>
-              <option value="Cadangan">🔄 Cadangan</option>
-              <option value="Tolak">❌ Tolak</option>
+            <label class="block text-sm font-medium mb-1">Technical Drawing Capability <span class="text-red-500">*</span></label>
+            <select name="technicalDrawing" required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+              <option value="">-- Select --</option>
+              <option value="Yes">Yes</option>
+              <option value="Limited">Limited</option>
+              <option value="No">No</option>
             </select>
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium mb-1">Catatan Tambahan</label>
-            <textarea name="catatan" rows="3" placeholder="Kondisi lokasi, kesan lapangan, hal penting lainnya..." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+            <label class="block text-sm font-medium mb-1">Delivery Capability <span class="text-red-500">*</span></label>
+            <textarea name="pengiriman" rows="2" required placeholder="Own fleet / third-party logistics, coverage area, etc." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
           </div>
 
         </div>
       </div>
 
-      <!-- SEKSI 4: Foto -->
+      <!-- SECTION 3: IMIP Requirement Checklist -->
       <div>
-        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-4 pb-2 border-b border-gray-100">Foto Dokumentasi</h2>
+        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-1 pb-2 border-b border-gray-100">IMIP Requirement Checklist</h2>
+        <p class="text-xs text-gray-400 mb-4">Check supplier's ability to fulfill each of IMIP's specific requirements.</p>
+
+        <div id="checklistContainer">
+
+          <!-- Size items -->
+          <div class="checklist-row">
+            <div>
+              <span class="checklist-label">600×300×30 mm</span>
+              <span class="checklist-label sub">Andesite paving slab</span>
+            </div>
+            <div class="radio-group">
+              <label><input type="radio" name="ck_600x300x30" value="Yes" required><span>Yes</span></label>
+              <label><input type="radio" name="ck_600x300x30" value="Limited"><span>Limited</span></label>
+              <label><input type="radio" name="ck_600x300x30" value="No"><span>No</span></label>
+            </div>
+          </div>
+
+          <div class="checklist-row">
+            <div>
+              <span class="checklist-label">400×200×30 mm</span>
+              <span class="checklist-label sub">Andesite paving slab</span>
+            </div>
+            <div class="radio-group">
+              <label><input type="radio" name="ck_400x200x30" value="Yes" required><span>Yes</span></label>
+              <label><input type="radio" name="ck_400x200x30" value="Limited"><span>Limited</span></label>
+              <label><input type="radio" name="ck_400x200x30" value="No"><span>No</span></label>
+            </div>
+          </div>
+
+          <div class="checklist-row">
+            <div>
+              <span class="checklist-label">600×200×250 mm</span>
+              <span class="checklist-label sub">Andesite curb</span>
+            </div>
+            <div class="radio-group">
+              <label><input type="radio" name="ck_curb" value="Yes" required><span>Yes</span></label>
+              <label><input type="radio" name="ck_curb" value="Limited"><span>Limited</span></label>
+              <label><input type="radio" name="ck_curb" value="No"><span>No</span></label>
+            </div>
+          </div>
+
+          <!-- Color items -->
+          <div class="checklist-row">
+            <div>
+              <span class="checklist-label">Grey Color</span>
+              <span class="checklist-label sub">Standard grey andesite</span>
+            </div>
+            <div class="radio-group">
+              <label><input type="radio" name="ck_grey" value="Yes" required><span>Yes</span></label>
+              <label><input type="radio" name="ck_grey" value="Limited"><span>Limited</span></label>
+              <label><input type="radio" name="ck_grey" value="No"><span>No</span></label>
+            </div>
+          </div>
+
+          <div class="checklist-row">
+            <div>
+              <span class="checklist-label">Dark Grey Color</span>
+              <span class="checklist-label sub">Dark andesite variant</span>
+            </div>
+            <div class="radio-group">
+              <label><input type="radio" name="ck_darkgrey" value="Yes" required><span>Yes</span></label>
+              <label><input type="radio" name="ck_darkgrey" value="Limited"><span>Limited</span></label>
+              <label><input type="radio" name="ck_darkgrey" value="No"><span>No</span></label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Checklist validation message -->
+        <p id="checklistError" class="hidden text-xs text-red-500 mt-2">Please fill in all checklist items above.</p>
+      </div>
+
+      <!-- SECTION 4: Commercial Info (optional) -->
+      <div>
+        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-1 pb-2 border-b border-gray-100">Commercial Information</h2>
+        <p class="text-xs text-gray-400 mb-4">All fields in this section are optional — fill in if available.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Contact (PIC + WhatsApp)</label>
+            <input type="text" name="kontak" placeholder="e.g. Mr. Budi — 08123456789" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Price (to Jakarta)</label>
+            <input type="text" name="harga" placeholder="e.g. Rp 250,000/m²" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Recommendation</label>
+            <select name="rekomendasi" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+              <option value="">-- Select --</option>
+              <option value="Shortlist">⭐ Shortlist</option>
+              <option value="Backup">🔄 Backup</option>
+              <option value="Reject">❌ Reject</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-sm font-medium mb-1">Additional Notes</label>
+            <textarea name="catatan" rows="3" placeholder="Site conditions, field impressions, other important details..." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SECTION 5: Photos -->
+      <div>
+        <h2 class="text-sm font-bold uppercase tracking-widest text-blue-700 mb-4 pb-2 border-b border-gray-100">Photo Documentation</h2>
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
           <label class="block text-sm font-medium text-blue-800 mb-2">
-            Upload Foto <span class="text-red-500">*</span>
-            <span class="font-normal text-blue-600 ml-1">(minimal 6, maks. 10 foto — masing-masing maks. 5 MB)</span>
+            Upload Photos <span class="text-red-500">*</span>
+            <span class="font-normal text-blue-600 ml-1">(min. 6, max. 10 photos — each max. 5 MB)</span>
           </label>
           <input type="file" id="fotoInput" accept="image/*" multiple class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
-          <p class="text-xs text-blue-600 mt-1">Folder otomatis dibuat berdasarkan nama supplier di Google Drive.</p>
-          <div id="fotoCounter" class="foto-counter warn">0 foto dipilih — minimal 6 foto diperlukan</div>
+          <p class="text-xs text-blue-600 mt-1">A folder will be auto-created per supplier name in Google Drive.</p>
+          <div id="fotoCounter" class="foto-counter err">0 photos selected — minimum 6 required</div>
           <div id="fotoPreview" class="foto-preview mt-3"></div>
         </div>
       </div>
@@ -210,18 +302,18 @@
       <!-- Status -->
       <div id="statusMessage" class="hidden rounded-lg p-4 text-sm font-medium"></div>
 
-      <!-- Progress bar -->
+      <!-- Progress -->
       <div id="progressWrapper" class="hidden">
         <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div id="progressBar" class="h-full bg-blue-600 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
-        <p class="text-xs text-gray-500 mt-1" id="progressText">Memproses...</p>
+        <p class="text-xs text-gray-500 mt-1" id="progressText">Processing...</p>
       </div>
 
       <!-- Submit -->
       <div class="flex justify-end pt-2">
         <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg shadow transition">
-          Simpan Data Survei
+          Save Survey Data
         </button>
       </div>
 
@@ -229,101 +321,87 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwG0pBtCvBrOKOuDPS6CT7XxuTw6m9LbMDuQSHmVpLbwqCcUF3Yi1S4j73y-GcKsf0s/exec";
+    const SCRIPT_URL = "PASTE_URL_APPS_SCRIPT_DISINI";
 
     const MIN_FOTO = 6;
     const MAX_FOTO = 10;
     const MAX_SIZE = 5 * 1024 * 1024;
     let selectedFiles = [];
 
-    // ============================================================
-    // INIT
-    // ============================================================
+    // ── INIT ──────────────────────────────────────────────────
     window.addEventListener("load", () => {
       const statusEl = document.getElementById("connectionStatus");
-      const textEl = document.getElementById("connectionText");
+      const textEl   = document.getElementById("connectionText");
 
       if (SCRIPT_URL === "PASTE_URL_APPS_SCRIPT_DISINI") {
         statusEl.className = "bg-red-50 border border-red-200 text-red-700 text-sm px-6 py-3 flex items-center gap-2";
-        textEl.textContent = "⚠️ URL Apps Script belum diisi di file HTML ini.";
+        textEl.textContent = "⚠️ Apps Script URL not set — edit the HTML file and fill in SCRIPT_URL.";
       } else {
         fetch(SCRIPT_URL)
           .then(r => r.json())
-          .then(data => {
-            if (data.status === "OK") {
+          .then(d => {
+            if (d.status === "OK") {
               statusEl.className = "bg-green-50 border border-green-200 text-green-700 text-sm px-6 py-3 flex items-center gap-2";
-              textEl.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-500"></span> Terhubung ke Google Sheets ✓';
+              textEl.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-500"></span> Connected to Google Sheets ✓';
             }
           })
           .catch(() => {
             statusEl.className = "bg-red-50 border border-red-200 text-red-700 text-sm px-6 py-3 flex items-center gap-2";
-            textEl.textContent = "⚠️ Gagal terhubung ke server. Periksa URL Apps Script.";
+            textEl.textContent = "⚠️ Could not connect to server. Check the Apps Script URL.";
           });
       }
 
       document.querySelector('[name="tanggalSurvei"]').value = new Date().toISOString().split("T")[0];
+      updateFotoCounter();
     });
 
-    // ============================================================
-    // GPS
-    // ============================================================
-    function ambilGPS() {
-      const btn = document.getElementById("btnGPS");
+    // ── GPS ───────────────────────────────────────────────────
+    function getGPS() {
+      const btn    = document.getElementById("btnGPS");
       const status = document.getElementById("gpsStatus");
-      const input = document.getElementById("koordinatGPS");
-      if (!navigator.geolocation) { status.textContent = "Browser tidak mendukung geolokasi."; return; }
+      const input  = document.getElementById("koordinatGPS");
+      if (!navigator.geolocation) { status.textContent = "Browser does not support geolocation."; return; }
       btn.disabled = true;
-      btn.textContent = "Mengambil...";
-      status.textContent = "Mendeteksi lokasi GPS...";
+      btn.textContent = "Detecting...";
+      status.textContent = "Detecting GPS location...";
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           input.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
-          status.textContent = `Akurasi: ±${Math.round(pos.coords.accuracy)} meter`;
+          status.textContent = `Accuracy: ±${Math.round(pos.coords.accuracy)} m`;
           btn.disabled = false;
           btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> GPS OK`;
         },
         (err) => {
-          status.textContent = "Gagal: " + err.message;
+          status.textContent = "Failed: " + err.message;
           btn.disabled = false;
-          btn.textContent = "Coba Lagi";
+          btn.textContent = "Retry";
         },
         { enableHighAccuracy: true, timeout: 15000 }
       );
     }
 
-    // ============================================================
-    // FOTO
-    // ============================================================
+    // ── PHOTOS ────────────────────────────────────────────────
     function updateFotoCounter() {
       const counter = document.getElementById("fotoCounter");
       const n = selectedFiles.length;
       if (n === 0) {
         counter.className = "foto-counter err";
-        counter.textContent = `0 foto dipilih — minimal ${MIN_FOTO} foto diperlukan`;
+        counter.textContent = `0 photos selected — minimum ${MIN_FOTO} required`;
       } else if (n < MIN_FOTO) {
         counter.className = "foto-counter warn";
-        counter.textContent = `${n} foto dipilih — tambah ${MIN_FOTO - n} foto lagi (minimal ${MIN_FOTO})`;
+        counter.textContent = `${n} photo${n>1?'s':''} selected — add ${MIN_FOTO - n} more (min. ${MIN_FOTO})`;
       } else {
         counter.className = "foto-counter ok";
-        counter.textContent = `${n} foto dipilih ✓`;
+        counter.textContent = `${n} photos selected ✓`;
       }
     }
 
     document.getElementById("fotoInput").addEventListener("change", (e) => {
-      const files = Array.from(e.target.files);
       const preview = document.getElementById("fotoPreview");
-
-      files.forEach(file => {
-        if (selectedFiles.length >= MAX_FOTO) {
-          alert(`Maksimal ${MAX_FOTO} foto. Sisa foto dilewati.`);
-          return;
-        }
-        if (file.size > MAX_SIZE) {
-          alert(`"${file.name}" terlalu besar (maks 5 MB). Dilewati.`);
-          return;
-        }
+      Array.from(e.target.files).forEach(file => {
+        if (selectedFiles.length >= MAX_FOTO) { alert(`Maximum ${MAX_FOTO} photos. Extra files skipped.`); return; }
+        if (file.size > MAX_SIZE) { alert(`"${file.name}" exceeds 5 MB limit. Skipped.`); return; }
         if (selectedFiles.find(f => f.name === file.name && f.size === file.size)) return;
-
         selectedFiles.push(file);
         const reader = new FileReader();
         reader.onload = (ev) => {
@@ -331,83 +409,91 @@
           wrap.className = "foto-thumb";
           wrap.dataset.name = file.name;
           wrap.dataset.size = file.size;
-          wrap.innerHTML = `
-            <img src="${ev.target.result}" alt="${file.name}" title="${file.name}">
-            <span class="remove-btn" onclick="hapusFoto(this)">×</span>
-          `;
+          wrap.innerHTML = `<img src="${ev.target.result}" alt="${file.name}" title="${file.name}"><span class="remove-btn" onclick="removePhoto(this)">×</span>`;
           preview.appendChild(wrap);
           updateFotoCounter();
         };
         reader.readAsDataURL(file);
       });
-
       e.target.value = "";
     });
 
-    function hapusFoto(btn) {
+    function removePhoto(btn) {
       const wrap = btn.closest(".foto-thumb");
       selectedFiles = selectedFiles.filter(f => !(f.name === wrap.dataset.name && f.size == wrap.dataset.size));
       wrap.remove();
       updateFotoCounter();
     }
 
-    // ============================================================
-    // SUBMIT
-    // ============================================================
+    // ── CHECKLIST VALIDATION ──────────────────────────────────
+    const CHECKLIST_NAMES = ["ck_600x300x30", "ck_400x200x30", "ck_curb", "ck_grey", "ck_darkgrey"];
+
+    function validateChecklist() {
+      const missing = CHECKLIST_NAMES.filter(name => !document.querySelector(`input[name="${name}"]:checked`));
+      const errEl = document.getElementById("checklistError");
+      if (missing.length > 0) { errEl.classList.remove("hidden"); return false; }
+      errEl.classList.add("hidden");
+      return true;
+    }
+
+    // ── SUBMIT ────────────────────────────────────────────────
     document.getElementById("surveyForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.target;
 
       if (!form.checkValidity()) { form.reportValidity(); return; }
+      if (!validateChecklist()) { document.getElementById("checklistError").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
 
-      // Validasi jumlah foto
       if (selectedFiles.length < MIN_FOTO) {
-        showStatus("error", `⚠️ Minimal ${MIN_FOTO} foto harus diunggah. Saat ini baru ${selectedFiles.length} foto.`);
+        showStatus("error", `⚠️ Minimum ${MIN_FOTO} photos required. Currently ${selectedFiles.length} selected.`);
         document.getElementById("fotoInput").scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
 
       if (SCRIPT_URL === "PASTE_URL_APPS_SCRIPT_DISINI") {
-        showStatus("error", "URL Apps Script belum diisi. Edit file HTML dan isi SCRIPT_URL.");
+        showStatus("error", "Apps Script URL not set. Edit the HTML file and fill in SCRIPT_URL.");
         return;
       }
 
       const submitBtn = document.getElementById("submitBtn");
       const progressWrapper = document.getElementById("progressWrapper");
       submitBtn.disabled = true;
-      submitBtn.textContent = "Memproses...";
+      submitBtn.textContent = "Processing...";
       progressWrapper.classList.remove("hidden");
-      setProgress(10, "Mempersiapkan data...");
+      setProgress(10, "Preparing data...");
 
-      const formData = new FormData(form);
       const dataObj = {};
-      for (const [key, value] of formData.entries()) dataObj[key] = value;
+      new FormData(form).forEach((v, k) => dataObj[k] = v);
 
-      setProgress(30, `Mengonversi ${selectedFiles.length} foto...`);
-      const fotosBase64 = await Promise.all(
-        selectedFiles.map(file => new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = ev => resolve({ data: ev.target.result, name: file.name, type: file.type });
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
+      // Collect checklist values
+      CHECKLIST_NAMES.forEach(name => {
+        const checked = document.querySelector(`input[name="${name}"]:checked`);
+        dataObj[name] = checked ? checked.value : "";
+      });
+
+      setProgress(30, `Converting ${selectedFiles.length} photos...`);
+      dataObj.fotos = await Promise.all(
+        selectedFiles.map(file => new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = ev => res({ data: ev.target.result, name: file.name, type: file.type });
+          r.onerror = rej;
+          r.readAsDataURL(file);
         }))
       );
 
-      dataObj.fotos = fotosBase64;
-      setProgress(60, "Mengirim ke Google Sheets...");
-
+      setProgress(60, "Sending to Google Sheets...");
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain" },
           body: JSON.stringify(dataObj)
         });
-        setProgress(90, "Memverifikasi...");
+        setProgress(90, "Verifying...");
         const result = await response.json();
 
         if (result.status === "Success") {
-          setProgress(100, "Selesai!");
-          showStatus("success", "✅ Data & foto berhasil disimpan ke Google Sheets dan Drive!");
+          setProgress(100, "Done!");
+          showStatus("success", "✅ Data and photos saved successfully to Google Sheets and Drive!");
           form.reset();
           document.getElementById("fotoPreview").innerHTML = "";
           selectedFiles = [];
@@ -415,14 +501,13 @@
           document.querySelector('[name="tanggalSurvei"]').value = new Date().toISOString().split("T")[0];
           document.getElementById("koordinatGPS").value = "";
         } else {
-          throw new Error(result.message || "Respons tidak dikenali");
+          throw new Error(result.message || "Unrecognized response");
         }
       } catch (err) {
-        showStatus("error", "❌ Gagal menyimpan: " + err.message);
-        console.error(err);
+        showStatus("error", "❌ Failed to save: " + err.message);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = "Simpan Data Survei";
+        submitBtn.textContent = "Save Survey Data";
         setTimeout(() => progressWrapper.classList.add("hidden"), 2000);
       }
     });
@@ -441,8 +526,6 @@
       el.classList.remove("hidden");
       el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-
-    updateFotoCounter();
   </script>
 
 </body>
