@@ -311,9 +311,14 @@
       </div>
 
       <!-- Submit -->
-      <div class="flex justify-end pt-2">
-        <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg shadow transition">
-          Save Survey Data
+      <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+        <button type="button" id="csvBtn" onclick="downloadCSV()" class="flex items-center justify-center gap-2 border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-sm transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download CSV Backup
+        </button>
+        <button type="submit" id="submitBtn" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-lg shadow transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          Save to Google Sheets
         </button>
       </div>
 
@@ -321,7 +326,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwG0pBtCvBrOKOuDPS6CT7XxuTw6m9LbMDuQSHmVpLbwqCcUF3Yi1S4j73y-GcKsf0s/exec";
+    const SCRIPT_URL = "PASTE_URL_APPS_SCRIPT_DISINI";
 
     const MIN_FOTO = 6;
     const MAX_FOTO = 10;
@@ -525,6 +530,75 @@
         : "rounded-lg p-4 text-sm font-medium bg-red-100 text-red-700 border border-red-200";
       el.classList.remove("hidden");
       el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    // ── CSV BACKUP ────────────────────────────────────────────
+    function downloadCSV() {
+      const form = document.getElementById("surveyForm");
+
+      // Validate required fields first
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      if (!validateChecklist()) {
+        document.getElementById("checklistError").scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      // Collect form data
+      const d = {};
+      new FormData(form).forEach((v, k) => d[k] = v);
+      CHECKLIST_NAMES.forEach(name => {
+        const checked = document.querySelector(`input[name="${name}"]:checked`);
+        d[name] = checked ? checked.value : "";
+      });
+
+      const supplierName = (d.namaSupplier || "supplier").replace(/[^a-zA-Z0-9_\-]/g, "_");
+      const dateStr = d.tanggalSurvei || new Date().toISOString().split("T")[0];
+
+      // CSV headers — same order as Google Sheets columns (no photo column)
+      const headers = [
+        "Survey Date", "Supplier Name", "Supplier Location", "GPS Coordinates",
+        "Distance to IMIP Warehouse (km)", "Owns Quarry", "Agrees to TOP",
+        "Products Offered", "Usual Supply Destinations", "Size Customization",
+        "Product Quality", "Lead Time", "Production Capacity", "Number of Employees",
+        "Factory / Quarry Area", "Technical Drawing Capability", "Delivery Capability",
+        "CK: 600x300x30 mm", "CK: 400x200x30 mm", "CK: 600x200x250 mm (Curb)",
+        "CK: Grey Color", "CK: Dark Grey Color",
+        "Contact (PIC + WA)", "Price (to Jakarta)", "Recommendation", "Additional Notes"
+      ];
+
+      const values = [
+        d.tanggalSurvei, d.namaSupplier, d.lokasiSupplier, d.koordinatGPS,
+        d.jarak, d.punyaTambang, d.setujuTop,
+        d.produk, d.supplykemana, d.kustomisasi,
+        d.kualitas, d.leadTime, d.kapasitas, d.jumlahKaryawan,
+        d.luasPabrik, d.technicalDrawing, d.pengiriman,
+        d.ck_600x300x30, d.ck_400x200x30, d.ck_curb,
+        d.ck_grey, d.ck_darkgrey,
+        d.kontak, d.harga, d.rekomendasi, d.catatan
+      ];
+
+      // Escape a CSV cell: wrap in quotes if it contains comma, newline, or quote
+      const esc = v => {
+        const s = (v === undefined || v === null) ? "" : String(v);
+        return (s.includes(",") || s.includes("\n") || s.includes('"'))
+          ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+
+      const csvContent = "\uFEFF" + // BOM for Excel UTF-8
+        headers.map(esc).join(",") + "\r\n" +
+        values.map(esc).join(",");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href     = url;
+      link.download = `survey_${supplierName}_${dateStr}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showStatus("success", `✅ CSV backup downloaded: survey_${supplierName}_${dateStr}.csv`);
     }
   </script>
 
